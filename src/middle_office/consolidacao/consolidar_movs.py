@@ -51,6 +51,9 @@ def _filtar_dados(data_processo: str,
 
     movimentos_dia['datahora_mov'] = pd.to_datetime(movimentos_dia['datahora_mov'])
 
+    # Continue o processamento APENAS com os movimentos que possuem mapeamento válido do Master
+    movimentos_dia = movimentos_dia.dropna(subset=['Nome_Fundo_Master'])
+
     # Filtra movimentos já processados para evitar duplicidade
     movs_nao_processados = movimentos_dia[~movimentos_dia['id_movimento'].isin(ids_movimento_ja_processados_dia)]
 
@@ -65,7 +68,7 @@ def _filtar_dados(data_processo: str,
 
     return movs_para_processar, movs_pendentes
 
-def _consolidar_movimentacoes(movs_para_processar: pd.DataFrame) -> pd.DataFrame:
+def _agregar_movimentacoes(movs_para_processar: pd.DataFrame) -> pd.DataFrame:
     if movs_para_processar.empty:
         consolidado = pd.DataFrame()
     else:
@@ -96,6 +99,12 @@ def consolidar_movimentacoes(data_processo: str,
                             ) -> Tuple[pd.DataFrame, List[str]]:
     movimentos_dia = df_bruto_dia.copy()
 
+    # Identificar casos que o Fundo Master não está mapeado
+    # (Virá como NULL por conta dos lefts join do SQL)
+    nao_mapeados_df = movimentos_dia[movimentos_dia['Nome_Fundo_Master'].isnull()]
+
+
+
     # Filtragem
     movs_para_processar, movs_pendentes = _filtar_dados(data_processo,
                                                         movimentos_dia,
@@ -104,7 +113,7 @@ def consolidar_movimentacoes(data_processo: str,
                                                        )
 
     # Consolidação
-    consolidado = _consolidar_movimentacoes(movs_para_processar)
+    consolidado = _agregar_movimentacoes(movs_para_processar)
 
     # Geração das Mensagens de log
     mensagens = []
@@ -115,6 +124,16 @@ def consolidar_movimentacoes(data_processo: str,
     mensagens.append(f"Movimentos do dia já processados anteriormente: {len(ids_movimento_ja_processados_dia)}")
     mensagens.append(f"Novos movimentos a processar nesta janela: {len(movs_para_processar)}")
     
+    # Alertas de pendência
+    # Pendência de mapeamento de Master - FIC
+    if not nao_mapeados_df.empty:
+        # Agrupa por FIC para gerar um alerta mais limpo
+        fics_problematicos = nao_mapeados_df['Nome_Fundo_FIC'].unique()
+        mensagens.append(f"ALERTA DE PENDÊNCIA: {len(nao_mapeados_df)} movimentos de {len(fics_problematicos)} FIC(s) sem mapeamento para Master foram encontrados e ignorados."+
+                         " É necessário preencher o mapeamento nas tabelas de fic_master_map e fundo")
+        for fic in fics_problematicos:
+            mensagens.append(f"ALERTA:  - FIC sem mapeamento com Master: '{fic}'")
+
     if consolidado.empty:
         mensagens.append("Sem dados consolidados nesta janela")
 
