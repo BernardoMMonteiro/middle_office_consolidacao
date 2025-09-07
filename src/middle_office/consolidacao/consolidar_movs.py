@@ -126,7 +126,7 @@ def consolidar_movimentacoes(data_processo: str,
         mensagens.append(f"Total consolidado (Resgate): {total_resgate:,.2f}")
 
     if not movs_pendentes.empty:
-        mensagens.append(f"ALERTA: Existem {len(movs_pendentes)} movimentos após a hora de corte que serão processados na próxima janela.")
+        mensagens.append(f"ALERTA: Existem {len(movs_pendentes)} movimentos após a hora de corte que AINDA devem ser processados em uma próxima janela.")
     else:
         mensagens.append("Todos os movimentos do dia foram incluídos neste processamento.")
 

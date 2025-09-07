@@ -18,7 +18,6 @@ def _formatar_numero_df(df_input: pd.DataFrame,
     df = df_input.copy()
     df['valor_numerico'] = (
                             df[coluna_valor]
-                            .str.replace(',', '', regex=False)  # remove milhar
                             .astype(float)                      # converte pra número
                         )
     df['valor_numerico'] = (df["valor_numerico"]  * fator_precisao).astype("int64")

@@ -9,17 +9,7 @@ import datetime
 
 from src.middle_office import configuracao
 
-logger = logging.getLogger(__file__)
-
-def __resetar_tabela_controle(con: sqlite3.Connection = configuracao.CONEXAO_PADRAO):
-    """Função somente para dev, apaga os dados da tabela de controle"""
-    cursor = con.cursor()
-    cursor.execute("""
-        DELETE FROM boletas_geradas 
-    """)
-    con.commit()
-    logger.debug("Dados da tabela de controle deletados!")
-
+logger = logging.getLogger(__name__)
 
 def criar_tabela_controle(con: sqlite3.Connection = configuracao.CONEXAO_PADRAO):
     """Cria a tabela de controle de duplicidade se ela não existir."""

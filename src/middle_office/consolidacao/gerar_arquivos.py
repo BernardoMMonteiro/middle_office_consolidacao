@@ -7,7 +7,7 @@ import uuid
 
 from src.middle_office.leitura_banco import controle_duplicidade
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 # Funções de formatação puras
 
@@ -18,7 +18,7 @@ def _formatar_df_ativo(df_input: pd.DataFrame, data_processo: str) -> pd.DataFra
 
     ativo_df['Data'] = data_formatada_br
     ativo_df['Tipo'] = ativo_df['tipo'].str.capitalize()
-    ativo_df['Valor'] = ativo_df['valor'].map('{:,.2f}'.format)
+    ativo_df['Valor'] = ativo_df['valor'].map('{:.2f}'.format)
     
     ativo_final = ativo_df[['Data', 'Nome_Fundo_FIC', 'Nome_Fundo_Master', 'Tipo', 'Valor']]
     ativo_final = ativo_final.rename(columns={'Nome_Fundo_FIC': 'FIC', 'Nome_Fundo_Master': 'Master'})
@@ -31,7 +31,7 @@ def _formatar_df_passivo(df_input: pd.DataFrame, data_processo: str) -> pd.DataF
 
     passivo_df['DATE'] = data_formatada_us
     passivo_df['MOVIMENTO'] = passivo_df['tipo'].apply(lambda x: 'RecebeAplicacao' if x == 'Aplicacao' else 'RecebeResgate')
-    passivo_df['VALOR'] = passivo_df['valor'].map('{:,.6f}'.format)
+    passivo_df['VALOR'] = passivo_df['valor'].map('{:.6f}'.format)
 
     passivo_final = passivo_df[['VALOR', 'DATE', 'Nome_Fundo_Master', 'Nome_Fundo_FIC', 'MOVIMENTO']]
     passivo_final = passivo_final.rename(columns={'Nome_Fundo_Master': 'MASTER', 'Nome_Fundo_FIC': 'FIC'})

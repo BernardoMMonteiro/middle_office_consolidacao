@@ -1,7 +1,10 @@
 import os
 from datetime import datetime
+import logging
 from .business_arx import processar_movimentacoes, gerar_arquivos_boleta
 from .configuracao import set_env, setup_logging, get_hora_corte
+
+logger = logging.getLogger(__name__)
 
 def rodar(datahora: str, gerar_arquivos: bool):
     setup_logging()    
@@ -15,11 +18,14 @@ def rodar(datahora: str, gerar_arquivos: bool):
     # e para permitir testar rapidamente datas diferentes, em produção o recomendado 
     # seria ser fornecida a data em um .env ou configurada automaticamente pelo Windows)
     with set_env('HORA_CORTE', hora):
-        print(f"\n=== Rodada (DATA={data}, HORA={get_hora_corte()}, gerar={gerar_arquivos}) ===")
+        logger.info(f"\n\n=== Rodada (DATA={data}, HORA={get_hora_corte()}, gerar={gerar_arquivos}) ===")
 
         mensagens = processar_movimentacoes(data)
         for msg in mensagens:
-            print(msg)
+            if 'ALERTA' in msg:
+                logger.warning(msg)
+            else:
+                logger.info(msg)
 
         if gerar_arquivos:
             outdir = "outputs"
