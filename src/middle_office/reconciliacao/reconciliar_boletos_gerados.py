@@ -128,7 +128,7 @@ def reconciliar_csvs(dia_reconciliar: str,
     # (multiplicando por 2 pois existem dois csvs por id, ativo e passivo)
     csvs_esperados = len(ids_csvs_esperados) * 2 
 
-    set_uuids_esperados = set(controle_duplicidade.pegar_csvs_gerados(dia_reconciliar, con=con))
+    set_uuids_esperados = set(ids_csvs_esperados)
 
     soma_total_dia_banco, soma_processado_banco = pegar_valores_banco(dia_reconciliar, con)
 
@@ -161,9 +161,8 @@ def reconciliar_csvs(dia_reconciliar: str,
     # A checagem mais importante: o valor nos CSVs bate com o valor que o DB diz que foi processado?
     # (pegando o dado do CSV passivo já que ele é mais preciso)
     diff_banco_csv = delta_passivo - soma_processado_banco
-    tolerancia_banco = 1/fator_precisao # diferença menor que o fator inicial de precisão
 
-    valores_csv_banco_batem = bool(abs(diff_banco_csv) < tolerancia_banco)
+    valores_csv_banco_batem = diff_banco_csv == 0
 
     # Checagem todos os movimentos do dia foram processados via soma das movimentacoes
     todos_movimentos_processados = soma_total_dia_banco == soma_processado_banco
