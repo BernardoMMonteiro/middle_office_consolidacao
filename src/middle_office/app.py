@@ -1,23 +1,29 @@
 import os
 from datetime import datetime
 from .business_arx import processar_movimentacoes, gerar_arquivos_boleta
-
+from .configuracao import set_env, setup_logging, get_hora_corte
 
 def rodar(datahora: str, gerar_arquivos: bool):
-    
+    setup_logging()    
     dt = datetime.fromisoformat(datahora)
     data = dt.strftime("%Y-%m-%d")
     hora = dt.strftime("%H:%M:%S")
 
-    print(f"\n=== Rodada (DATA={data}, HORA={hora}, gerar={gerar_arquivos}) ===")
 
-    mensagens = processar_movimentacoes(data)
-    for msg in mensagens:
-        print(msg)
+    # sobrescrevendo a variável de ambiente em .env para testar
+    # (somente fiz isso para não mudar muito a estrutura do app.py fornecido
+    # e para permitir testar rapidamente datas diferentes, em produção o recomendado 
+    # seria ser fornecida a data em um .env ou configurada automaticamente pelo Windows)
+    with set_env('HORA_CORTE', hora):
+        print(f"\n=== Rodada (DATA={data}, HORA={get_hora_corte()}, gerar={gerar_arquivos}) ===")
 
-    if gerar_arquivos:
-        outdir = "outputs"
-        gerar_arquivos_boleta(data, outdir)
+        mensagens = processar_movimentacoes(data)
+        for msg in mensagens:
+            print(msg)
+
+        if gerar_arquivos:
+            outdir = "outputs"
+            gerar_arquivos_boleta(data, outdir)
 
 
 def main():

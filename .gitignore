@@ -2,3 +2,8 @@
 .venv/
 .vscode/
 .DS_Store
+.env
+.outpus*/
+__pycache__/
+*.py[cod]
+*$.py.class

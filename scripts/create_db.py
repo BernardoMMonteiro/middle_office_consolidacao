@@ -39,6 +39,7 @@ CREATE TABLE movements (
 );
 '''
 
+
 def seed_basic(conn):
     cur = conn.cursor()
     fundos = [
